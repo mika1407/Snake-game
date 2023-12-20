@@ -1,11 +1,16 @@
 // Define HTML elements
-const board = document.getElementById('game-board')
+const board = document.getElementById('game-board');
+const instructionText = document.getElementById('instruction-text');
+const logo = document.getElementById('logo');
 
 // Define game variables
 const gridSize = 20;
 let snake = [{ x:10, y:10 }];
 let food = generateFood();
 let direction = 'right';
+let gameInterval;
+let gameSpeedDelay = 200;
+let gameStarted = false;
 
 // Draw game map, snake, food
 function draw() {
@@ -37,7 +42,7 @@ function setPosition(element, position) {
 }
 
 // Testing draw function
-draw();
+// draw();
 
 // Draw food function
 function drawFood() {
@@ -73,11 +78,75 @@ function move(){
 
   snake.unshift(head);
 
-  snake.pop();
+  // snake.pop();
+
+  if (head.x === food.x && head.y === food.y){
+    food = generateFood();
+    increaseSpeed();
+    clearInterval(gameInterval);  // Clear past interval
+    gameInterval = setInterval(() => {
+      move();
+      // checkCollision();
+      draw();
+    }, gameSpeedDelay);
+  } else {
+    snake.pop();
+  }
 }
 
 // Test moving
-setInterval(() => {
-  move(); // Move first
-  draw(); // Then draw again new position
-}, 200);
+// setInterval(() => {
+//   move(); // Move first
+//   draw(); // Then draw again new position
+// }, 200);
+
+// Start game function
+function startGame() {
+  gameStarted = true;  // Keep track of a running game.
+  instructionText.style.display = 'none';
+  logo.style.display = 'none';
+  gameInterval = setInterval(() => {
+    move();
+    //checkCollision();
+    draw();
+  }, gameSpeedDelay);
+}
+
+// Keypress event listener
+function handleKeyPress(event) {
+  if ((!gameStarted && event.code === 'Space') ||
+      (!gameStarted && event.key === ' ')
+  ){
+    startGame();
+  }else {
+    switch (event.key) {
+      case 'ArrowUp':
+        direction = 'up';
+        break;
+      case 'ArrowDown':
+        direction = 'down';
+        break;
+      case 'ArrowLeft':
+        direction = 'left';
+        break;
+      case 'ArrowRight':
+        direction = 'right';
+        break;
+    }
+  }
+}
+
+document.addEventListener('keydown', handleKeyPress);
+
+function increaseSpeed() {
+     console.log(gameSpeedDelay);
+  if (gameSpeedDelay > 150) {
+    gameSpeedDelay -= 5;
+  } else if (gameSpeedDelay > 100) {
+    gameSpeedDelay -= 3;
+  } else if (gameSpeedDelay > 50) {
+    gameSpeedDelay -= 2;
+  } else if (gameSpeedDelay > 25) {
+    gameSpeedDelay -= 1;
+  }
+}
